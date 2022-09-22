@@ -1,11 +1,8 @@
-const express = require('express')
-const app = express()
-const port = 3000
-const routes = require('./src/routes.js')
+const { app } = require('./server')
+const routes = require('./src/routes')
+const bodyParser = require('body-parser')
 
-app.listen(port, () => {
-  console.info(`Server is running on port ${port}`)
-})
+app.use(bodyParser.json())
 
 app.use((error, req, res, next) => {
   console.error(error.stack);
