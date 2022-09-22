@@ -1,11 +1,15 @@
 const express = require('express')
 const app = express()
 const port = 3000
-
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
+const routes = require('./src/routes.js')
 
 app.listen(port, () => {
   console.info(`Server is running on port ${port}`)
 })
+
+app.use((error, req, res, next) => {
+  console.error(error.stack);
+  res.status(500).send('Something Broke!');
+ })
+
+app.use('', routes)
