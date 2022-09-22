@@ -1,7 +1,6 @@
-const express = require('express')
-const mongoose = require('mongoose')
+import { app } from './app'
+import mongoose from 'mongoose'
 
-const app = express()
 const port = 3000
 const uri = 'mongodb+srv://Goldem_Man:diMD2xwnxtSkU5Oi@cluster0.ewmd7ut.mongodb.net/?retryWrites=true&w=majority'
 
@@ -17,8 +16,3 @@ const start = async() => {
 }
 
 start()
-
-module.exports = {
-  app,
-  mongoose
-}
