@@ -1,9 +1,10 @@
 import mongoose, { Schema } from 'mongoose'
 
 const bidSchema = new Schema({
-  name:  String,
-  description: String,
-  date: { type: Date, default: Date.now },
+  bidRows: {
+    type: Map,
+    of: String
+  }
 })
 
 export default mongoose.model('Bid', bidSchema)
