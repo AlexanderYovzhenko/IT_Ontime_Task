@@ -1,9 +1,15 @@
-<script setup lang="ts">
-import TheWelcome from '../components/TheWelcome.vue'
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <main>
-    <TheWelcome />
+    <p class="text">Оставте вашу заявку</p>
   </main>
 </template>
+
+<style>
+.text {
+  font-size: 50px;
+  text-align: center;
+  padding-top: 50px;
+}
+</style>
