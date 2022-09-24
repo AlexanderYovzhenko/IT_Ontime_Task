@@ -7,13 +7,17 @@
         {{ bid.name }}
       </div>
       <div class="bid-buttons">
-        <button class="button button-refactor">Редактировать</button>
+        <RouterLink class="link-refactor" to="/bidForm">
+          <button class="button button-refactor">Редактировать</button>
+        </RouterLink>
         <button class="button button-delete" @click="deleteBid(bid.id)">
           Удалить
         </button>
       </div>
     </div>
-    <button class="button button-add">Добавить заявку</button>
+    <RouterLink class="link-add" to="/bidForm">
+      <button class="button button-add">Добавить заявку</button>
+    </RouterLink>
   </div>
 </template>
 
@@ -87,9 +91,12 @@ export default {
   box-shadow: 0 0.3em 1em -0.5em #14a73e98;
   transform: translateY(2px);
 }
-.button-add {
+.link-add {
   margin-top: 50px;
   align-self: center;
+}
+.link-add:hover {
+  background-color: inherit;
 }
 
 .bids-list {
@@ -119,6 +126,9 @@ export default {
     rgb(84, 84, 219) 0%,
     rgba(102, 247, 113, 1) 100%
   );
+}
+.link-refactor:hover {
+  background-color: inherit;
 }
 .button-delete {
   margin-left: 10px;

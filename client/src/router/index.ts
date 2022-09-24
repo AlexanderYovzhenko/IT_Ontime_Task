@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import BidsView from "../views/BidsView.vue";
+import BidFormView from "../views/BidFormView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,6 +15,11 @@ const router = createRouter({
       path: "/bids",
       name: "bids",
       component: BidsView,
+    },
+    {
+      path: "/bidForm",
+      name: "bidForm",
+      component: BidFormView,
     },
   ],
 });
