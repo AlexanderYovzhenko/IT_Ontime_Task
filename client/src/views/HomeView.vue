@@ -11,5 +11,6 @@
   font-size: 50px;
   text-align: center;
   padding-top: 50px;
+  color: teal;
 }
 </style>
