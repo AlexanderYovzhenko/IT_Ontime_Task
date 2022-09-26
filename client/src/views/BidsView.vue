@@ -1,5 +1,5 @@
 <template>
-  <div class="bids">
+  <div class="bids" v-if="!isOpenForm">
     <h2 class="bids-title">Заявки</h2>
     <div class="bids-list" v-for="(bid, index) in bids" :key="bid.id">
       <div class="bid">
@@ -7,17 +7,54 @@
         {{ bid.name }}
       </div>
       <div class="bid-buttons">
-        <RouterLink class="link-refactor" to="/bidForm">
-          <button class="button button-refactor">Редактировать</button>
-        </RouterLink>
+        <button class="button button-refactor" @click="bidRefactor(bid)">
+          Редактировать
+        </button>
         <button class="button button-delete" @click="deleteBid(bid.id)">
           Удалить
         </button>
       </div>
     </div>
-    <RouterLink class="link-add" to="/bidForm">
-      <button class="button button-add">Добавить заявку</button>
-    </RouterLink>
+    <button class="button button-add" @click="isOpenForm = !isOpenForm">
+      Добавить заявку
+    </button>
+  </div>
+  <div class="bidForm" v-if="isOpenForm">
+    <h2 class="bid-title">Заявка</h2>
+    <form class="form" @submit.prevent="submit">
+      <div class="form__group field">
+        <input
+          type="text"
+          class="form__field"
+          v-model="name"
+          placeholder="Name"
+          name="name"
+        />
+        <label for="name" class="form__label">Название</label>
+      </div>
+      <div class="form__group field">
+        <textarea
+          type="textarea"
+          class="form__field"
+          v-model="description"
+          placeholder="Name"
+          name="name"
+        />
+        <label for="name" class="form__label">Описание</label>
+      </div>
+      <div class="form__group field">
+        <input
+          type="date"
+          class="form__field"
+          v-model="date"
+          placeholder="Name"
+          name="name"
+        />
+        <label for="name" class="form__label">Дата</label>
+      </div>
+      <button class="button button-submit">Отправить</button>
+    </form>
+    <button class="button" @click="isOpenForm = !isOpenForm">↞</button>
   </div>
 </template>
 
@@ -31,22 +68,82 @@ export default {
   data() {
     return {
       bids: null,
+      isOpenForm: false,
+      isFormRefactor: false,
+      idBid: "",
+      name: "",
+      description: "",
+      date: "",
     };
   },
   methods: {
+    submit() {
+      this.isFormRefactor ? this.putBid() : this.addBid();
+    },
+    async getBids() {
+      const bidsRes = await axios.get("http://localhost:3000/bids");
+      this.bids = bidsRes.data.map((bid) => {
+        const { _id: id, bidRows } = bid;
+        return { id, ...bidRows };
+      });
+      return;
+    },
+    async addBid() {
+      const bidRequest = {};
+      bidRequest.name = this.name;
+      bidRequest.description = this.description;
+      bidRequest.date = this.date;
+      if (this.name === "" || this.description === "" || this.date === "") {
+        alert("Заполните все поля!");
+        return;
+      }
+      const res = await axios.post("http://localhost:3000/bids", bidRequest);
+      if (res.status === 201) {
+        this.name = "";
+        this.description = "";
+        this.date = "";
+        alert("Ваша заявка отправлена!");
+        this.getBids();
+      }
+    },
+    async putBid() {
+      const bidRequest = {};
+      bidRequest.name = this.name;
+      bidRequest.description = this.description;
+      bidRequest.date = this.date;
+      if (this.name === "" || this.description === "" || this.date === "") {
+        alert("Заполните все поля!");
+        return;
+      }
+      const res = await axios.put(
+        `http://localhost:3000/bids?id=${this.idBid}`,
+        bidRequest
+      );
+      if (res.status === 201) {
+        this.name = "";
+        this.description = "";
+        this.date = "";
+        alert("Ваша заявка изменена!");
+        this.getBids();
+      }
+    },
     async deleteBid(id) {
       const res = await axios.delete(`http://localhost:3000/bids?id=${id}`);
       if (res.status === 204) {
         this.bids = this.bids.filter((bid) => bid.id !== id);
       }
     },
+    bidRefactor(bid) {
+      this.isOpenForm = !this.isOpenFom;
+      this.isFormRefactor = true;
+      this.name = bid.name;
+      this.description = bid.description;
+      this.date = bid.date;
+      this.idBid = bid.id;
+    },
   },
-  async mounted() {
-    const bidsRes = await axios.get("http://localhost:3000/bids");
-    this.bids = bidsRes.data.map((bid) => {
-      const { _id: id, bidRows } = bid;
-      return { id, ...bidRows };
-    });
+  mounted() {
+    this.getBids();
   },
 };
 </script>
@@ -91,12 +188,9 @@ export default {
   box-shadow: 0 0.3em 1em -0.5em #14a73e98;
   transform: translateY(2px);
 }
-.link-add {
+.button-add {
   margin-top: 50px;
   align-self: center;
-}
-.link-add:hover {
-  background-color: inherit;
 }
 
 .bids-list {
@@ -143,5 +237,92 @@ export default {
   .bids {
     min-height: 100vh;
   }
+}
+
+/* Form */
+
+.bidForm {
+  padding: 50px 10px;
+}
+.bid-title {
+  font-size: 33px;
+  color: teal;
+  text-align: center;
+  margin: 10px 0 30px;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+}
+.button-submit {
+  margin: 50px 0;
+}
+
+/* styles for inputs */
+.form__group {
+  position: relative;
+  padding: 15px 0 0;
+  margin-top: 10px;
+  width: 50%;
+}
+
+.form__field {
+  font-family: inherit;
+  width: 100%;
+  border: 0;
+  border-bottom: 2px solid #9b9b9b;
+  outline: 0;
+  font-size: 1.3rem;
+  color: white;
+  padding: 7px 0;
+  background: transparent;
+  transition: border-color 0.2s;
+}
+.form__field::placeholder {
+  color: transparent;
+}
+.form__field:placeholder-shown ~ .form__label {
+  font-size: 1.3rem;
+  cursor: text;
+  top: 20px;
+}
+
+.form__label {
+  position: absolute;
+  top: 0;
+  display: block;
+  transition: 0.2s;
+  font-size: 1rem;
+  color: #9b9b9b;
+}
+
+.form__field:focus {
+  padding-bottom: 6px;
+  font-weight: 700;
+  border-width: 3px;
+  border-image: linear-gradient(to right, #11998e, #38ef7d);
+  border-image-slice: 1;
+}
+.form__field:focus ~ .form__label {
+  position: absolute;
+  top: 0;
+  display: block;
+  transition: 0.2s;
+  font-size: 1rem;
+  color: #11998e;
+  font-weight: 700;
+}
+.form__field[type=textarea] {
+  resize: vertical;
+  min-height: 200px;
+  overflow-wrap: break-word;
+}
+/* reset input */
+.form__field:required,
+.form__field:invalid {
+  box-shadow: none;
 }
 </style>
