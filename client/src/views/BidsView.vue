@@ -15,7 +15,13 @@
         </button>
       </div>
     </div>
-    <button class="button button-add" @click="isOpenForm = !isOpenForm">
+    <button
+      class="button button-add"
+      @click="
+        isOpenForm = !isOpenForm;
+        isFormRefactor = false;
+      "
+    >
       Добавить заявку
     </button>
   </div>
@@ -54,7 +60,15 @@
       </div>
       <button class="button button-submit">Отправить</button>
     </form>
-    <button class="button" @click="isOpenForm = !isOpenForm">↞</button>
+    <button
+      class="button"
+      @click="
+        isOpenForm = !isOpenForm;
+        clean();
+      "
+    >
+      ↞
+    </button>
   </div>
 </template>
 
@@ -140,6 +154,11 @@ export default {
       this.description = bid.description;
       this.date = bid.date;
       this.idBid = bid.id;
+    },
+    clean() {
+      this.name = "";
+      this.description = "";
+      this.date = "";
     },
   },
   mounted() {
@@ -315,8 +334,7 @@ export default {
   color: #11998e;
   font-weight: 700;
 }
-.form__field[type=textarea] {
-  resize: vertical;
+.form__field[type="textarea"] {
   min-height: 200px;
   overflow-wrap: break-word;
 }
