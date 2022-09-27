@@ -10,7 +10,7 @@
         <button class="button button-refactor" @click="bidRefactor(bid)">
           Редактировать
         </button>
-        <button class="button button-delete" @click="deleteBid(bid.id)">
+        <button class="button button-delete" @click="deleteBid(bid)">
           Удалить
         </button>
       </div>
@@ -28,43 +28,41 @@
   <div class="bidForm" v-if="isOpenForm">
     <h2 class="bid-title">Заявка</h2>
     <form class="form" @submit.prevent="submit">
-      <div class="form__group field">
-        <input
-          type="text"
-          class="form__field"
-          v-model="name"
-          placeholder="Name"
-          name="name"
-        />
-        <label for="name" class="form__label">Название</label>
-      </div>
-      <div class="form__group field">
-        <textarea
-          type="textarea"
-          class="form__field"
-          v-model="description"
-          placeholder="Name"
-          name="name"
-        />
-        <label for="name" class="form__label">Описание</label>
-      </div>
-      <div class="form__group field">
-        <input
-          type="date"
-          class="form__field"
-          v-model="date"
-          placeholder="Name"
-          name="name"
-        />
-        <label for="name" class="form__label">Дата</label>
+      <div
+        class="container-form"
+        v-for="(input, index) in fieldsForm"
+        :key="index"
+      >
+        <div class="form__group field">
+          <input
+            v-if="input.type !== 'textarea'"
+            :type="input.type"
+            class="form__field"
+            v-model="bidData[input.name]"
+            placeholder="input.placeholder"
+            name="input.name"
+            v-bind:required="input.required"
+          />
+          <textarea
+            v-else
+            :type="input.type"
+            class="form__field"
+            v-model="bidData[input.name]"
+            placeholder="input.placeholder"
+            name="input.name"
+            v-bind:required="input.required"
+          />
+          <label for="input.name" class="form__label">{{ input.value }}</label>
+        </div>
       </div>
       <button class="button button-submit">Отправить</button>
     </form>
+
     <button
       class="button"
       @click="
         isOpenForm = !isOpenForm;
-        clean();
+        cleanFormValue();
       "
     >
       ↞
@@ -84,10 +82,31 @@ export default {
       bids: null,
       isOpenForm: false,
       isFormRefactor: false,
+      bidData: {},
       idBid: "",
-      name: "",
-      description: "",
-      date: "",
+      fieldsForm: [
+        {
+          type: "text",
+          name: "name",
+          placeholder: "Название",
+          required: false,
+          value: "Название",
+        },
+        {
+          type: "textarea",
+          name: "description",
+          placeholder: "Описание",
+          required: false,
+          value: "Описание",
+        },
+        {
+          type: "date",
+          name: "date",
+          placeholder: "Дата",
+          required: false,
+          value: "Дата",
+        },
+      ],
     };
   },
   methods: {
@@ -103,62 +122,42 @@ export default {
       return;
     },
     async addBid() {
-      const bidRequest = {};
-      bidRequest.name = this.name;
-      bidRequest.description = this.description;
-      bidRequest.date = this.date;
-      if (this.name === "" || this.description === "" || this.date === "") {
-        alert("Заполните все поля!");
-        return;
-      }
-      const res = await axios.post("http://localhost:3000/bids", bidRequest);
+      const res = await axios.post("http://localhost:3000/bids", this.bidData);
       if (res.status === 201) {
-        this.name = "";
-        this.description = "";
-        this.date = "";
+        this.cleanFormValue();
         alert("Ваша заявка отправлена!");
         this.getBids();
       }
     },
     async putBid() {
-      const bidRequest = {};
-      bidRequest.name = this.name;
-      bidRequest.description = this.description;
-      bidRequest.date = this.date;
-      if (this.name === "" || this.description === "" || this.date === "") {
-        alert("Заполните все поля!");
-        return;
-      }
       const res = await axios.put(
         `http://localhost:3000/bids?id=${this.idBid}`,
-        bidRequest
+        this.bidData
       );
       if (res.status === 201) {
-        this.name = "";
-        this.description = "";
-        this.date = "";
         alert("Ваша заявка изменена!");
         this.getBids();
       }
     },
-    async deleteBid(id) {
-      const res = await axios.delete(`http://localhost:3000/bids?id=${id}`);
+    async deleteBid(bidObj) {
+      const res = await axios.delete(
+        `http://localhost:3000/bids?id=${bidObj.id}`
+      );
       if (res.status === 204) {
-        this.bids = this.bids.filter((bid) => bid.id !== id);
+        this.bids = this.bids.filter((bid) => bid.id !== bidObj.id);
       }
     },
     bidRefactor(bid) {
       this.isOpenForm = !this.isOpenFom;
       this.isFormRefactor = true;
-      this.name = bid.name;
-      this.description = bid.description;
-      this.date = bid.date;
       this.idBid = bid.id;
+      delete bid.id;
+      this.bidData = { ...bid };
     },
-    clean() {
-      this.name = "";
-      this.description = "";
-      this.date = "";
+    cleanFormValue() {
+      this.bidData = Object.fromEntries(
+        Object.entries(this.bidData).map(([key, value]) => [key, (value = "")])
+      );
     },
   },
   mounted() {
@@ -269,14 +268,20 @@ export default {
   text-align: center;
   margin: 10px 0 30px;
 }
-.form {
+.container-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
   justify-content: center;
   align-items: center;
 }
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 .button-submit {
+  align-self: flex-end;
   margin: 50px 0;
 }
 
@@ -335,8 +340,9 @@ export default {
   font-weight: 700;
 }
 .form__field[type="textarea"] {
-  min-height: 200px;
-  overflow-wrap: break-word;
+  min-height: 150px;
+  padding-right: 5px;
+  overflow-wrap: break-all;
 }
 /* reset input */
 .form__field:required,
