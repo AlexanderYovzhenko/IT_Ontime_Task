@@ -2,7 +2,7 @@ import { app } from './app'
 import mongoose from 'mongoose'
 
 const port = 3000
-const uri = 'mongodb+srv://Goldem_Man:diMD2xwnxtSkU5Oi@cluster0.ewmd7ut.mongodb.net/?retryWrites=true&w=majority'
+const uri = 'mongodb+srv://Goldem_Man:diMD2xwnxtSkU5Oi@cluster0.v5vgd6r.mongodb.net/?retryWrites=true&w=majority'
 
 const start = async() => {
   try {
