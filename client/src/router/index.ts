@@ -12,6 +12,13 @@ const fieldsFormArray = [
     value: "Название",
   },
   {
+    type: "text",
+    name: "name",
+    placeholder: "Название",
+    required: false,
+    value: "Название",
+  },
+  {
     type: "textarea",
     name: "description",
     placeholder: "Описание",
